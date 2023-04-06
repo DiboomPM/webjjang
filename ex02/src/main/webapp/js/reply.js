@@ -69,7 +69,7 @@
  		}); // end $ajax
  	} // end function write()  
  	
- 	// update()
+ 		// update()
  	function update(reply, callback, error){
  		console.log("update Reply......................................");
  		console.log("Reply = " + JSON.stringify(reply));
@@ -102,11 +102,46 @@
  	} // end function update()  
  	
  	
+ 	
+ 	// delete()
+ 	function deleteFunc(rno, callback, error){
+ 		console.log("delete Reply......................................");
+ 		console.log("rno = " + rno);
+ 		
+ 		// 서버로 데이터를 보내서 댓글 등록을 시킨다.
+ 		$.ajax({
+ 			url : "/boardreply/delete.do?rno=" + rno,
+ 			//url : "/boardreply/delete.do",
+ 			type : "delete",
+ 			success : function(result, status, xhr){
+ 				if(callback){
+ 					callback(result);
+ 				} else {
+ 					alert("성공적으로 댓글 삭제가 되었습니다")
+ 					console.log(result);
+ 				}
+ 			},
+ 			error : function(xhr, status, er){
+ 				console.log(xhr);
+ 				console.log(status);
+ 				console.log(er);
+ 				if(error){
+ 					error();
+ 				} else{
+ 					alert("댓글 삭제에 실패하였습니다.")
+ 				}
+ 			} // end error function
+ 		}); // end $ajax
+ 	} // end function delete() 
+ 	
+ 
+ 	
  	return {
 		//함수 리턴
 		list:list, //replyService.list() 를 사용하면 쓸수있음 
 		write:write, //replyService.write() 를 사용하면 쓸수있음 
 		update:update, //replyService.update() 를 사용하면 쓸수있음 
+		delete:deleteFunc, //replyService.delete() 를 사용하면 쓸수있음 
 		
 	};
  

@@ -45,7 +45,7 @@ public class boardReplyServiceImpl implements BoardReplyService {
 	}
 
 	@Override
-	public Long delete(Long rno) {
+	public long delete(Long rno) {
 		// TODO Auto-generated method stub
 		return mapper.delete(rno);
 	}

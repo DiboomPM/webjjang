@@ -9,10 +9,10 @@ import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.propertyeditors.URLEditor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -80,6 +80,24 @@ public class BoardReplyController {
 			int result = service.update(vo);
 			if(result == 1)
 				return new ResponseEntity<String>(URLEncoder.encode("댓글이 정상적으로 수정되었습니다.","UTF-8"), HttpStatus.OK);
+			else
+				return new ResponseEntity<String>(URLEncoder.encode("댓글의 정보를 확인해주세요. 새로고침 후 진행해주세요","UTF-8"), HttpStatus.INTERNAL_SERVER_ERROR);
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+			return new ResponseEntity<String>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+	
+	@DeleteMapping(value = "/delete.do", produces = {MediaType.TEXT_PLAIN_VALUE})
+	public ResponseEntity<String> delete(long rno) {
+		
+		log.info(rno);
+		
+		try {
+			long result = service.delete(rno);
+			log.info(rno);
+			if(result == 1)
+				return new ResponseEntity<String>(URLEncoder.encode("댓글이 정상적으로 삭제가 되었습니다.","UTF-8"), HttpStatus.OK);
 			else
 				return new ResponseEntity<String>(URLEncoder.encode("댓글의 정보를 확인해주세요. 새로고침 후 진행해주세요","UTF-8"), HttpStatus.INTERNAL_SERVER_ERROR);
 		} catch (UnsupportedEncodingException e) {

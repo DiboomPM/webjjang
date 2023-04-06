@@ -32,6 +32,7 @@ ul.chat > li:hover{
 
 		var no = ${vo.no};
 		var replyUL = $(".chat");
+		var replyPageFooter = $("#replyPageDiv");
 
 		var page = 1;
 
@@ -47,6 +48,7 @@ ul.chat > li:hover{
 			function(data) {
 				//alert(data);
 				var list = data.list;
+				var pageObject = data.pageObject;
 
 				// 추가 해야할 li 태그들을 저장하는 변수 선언
 				var str = "";
@@ -74,6 +76,27 @@ ul.chat > li:hover{
 				}
 
 				replyUL.html(str);
+
+				//페이지네이션 코드 작성하기 - pageObject를 사용하여  
+				str = "";
+				str += "<ul class='pagination'>";
+				str += "<li class='page-item ";
+				if(pageObject.startPage == 1) str += "disabled";
+				str += "'><a class='page-link' href='#'>Previous</a></li>";
+				for(var i = pageObject.startPage; i <= pageObject.endPage; i++){
+				  str += "<li class='page-item ";
+				  if(page == i) str += "active";
+				  str += "'><a class='page-link' href='#'>"+i+"</a></li>";
+				}
+				str += "<li class='page-item ";
+				if(pageObject.endPage == pageObject.totalPage) str += "disabled";
+				str += "'><a class='page-link' href='#'>Next</a></li>";
+				str += "</ul>";
+
+				// 댓글 페이지 네이션 출력
+				replyPageFooter.html(str);
+				
+				
 			});
 		};
 
@@ -179,58 +202,90 @@ ul.chat > li:hover{
 
 		//모달 창안에 삭제 버튼 이벤트 
 		$("#modalDeleteBtn").click(function(){
-			alert("댓글 삭제 처리 진행");
+// 			alert("댓글 삭제 처리 진행");
+			
+			//데이터 수집
+			var rno = $("#rno").val();
+			
+			replyService.delete(rno, function(result){
+
+				// 삭제 성공되면 처리 내용
+				// 1. 리스트 데이터를 다시 가져와서 표시한다.
+				page = 1;
+				showList(page);
+				// 2. 모달창은 닫는다.
+				$("#replyModal").modal("hide");
+				// 3. 메세지 모달창에 데이터 세팅하고 보여준다.
+				if(result) alert(decodeURI(result.replaceAll("+", " ")));
+				else alert("댓글 삭제가 완료 되었습니다.");
+
+			});
 		});
-		
+
+		// 댓글 페이지네이션 이벤트
+		$("#replyPageDiv").on("click", "ul>li", function(){
+			//alert("댓글 페이지 클릭");
+			page = $(this).text();
+			//alert(page);
+// 			if($(this).hasClass("active")) 
+// 				alert("현재 페이지 입니다.");
+// 			else alert("현재 페이지가 아닙니다.")
+			//현재 페이지가 아닌 경우 페이지를 이동 시킨다.
+			if(!$(this).hasClass("active")) 
+				showList(page);
+			return false; // 페이지 이동 취소
+		});
 	});
 </script>
 
 </head>
 <body>
-	<div class="card-header py-3">게시판 글 보기</div>
-	<div class="card-body">
-		<table class="table">
-			<tbody>
-				<tr>
-					<th>글번호</th>
-					<td>${vo.no }</td>
-				</tr>
-				<tr>
-					<th>제목</th>
-					<td>${vo.title }</td>
-				</tr>
-				<tr>
-					<th>내용</th>
-					<td>${vo.content }</td>
-				</tr>
-				<tr>
-					<th>작성자</th>
-					<td>${vo.writer }</td>
-				</tr>
-				<tr>
-					<th>작성일</th>
-					<td><fmt:formatDate pattern="yyyy-MM-dd"
-							value="${vo.writeDate }" /></td>
-				</tr>
-				<tr>
-					<th>조회수</th>
-					<td><fmt:formatNumber pattern="#,###" value="${vo.hit }" /></td>
-				</tr>
-			</tbody>
-		</table>
-		<a href="update.do?no=${vo.no }" class="btn btn-default">수정</a> <a
-			href="#" class="btn btn-default" onclick="return false"
-			id="deleteBtn">삭제</a> <a href="list.do" class="btn btn-default">리스트</a>
-		<div id="deleteDiv">
-			<form action="delete.do" method="post">
-				<input name="no" value="${vo.no }" type="hidden">
-				<div class="form-group">
-					<label>본인 확인용 비밀번호 입력 :</label> <input name="pw"
-						class="form-control" type="password">
-				</div>
-				<button class="btn btn-danger btn-sm">삭제</button>
-				<button class="btn btn-warning btn-sm" type="button" id="cancelBtn">취소</button>
-			</form>
+	<div class="card shadow md-4">
+		<div class="card-header py-3">게시판 글 보기</div>
+		<div class="card-body">
+			<table class="table">
+				<tbody>
+					<tr>
+						<th>글번호</th>
+						<td>${vo.no }</td>
+					</tr>
+					<tr>
+						<th>제목</th>
+						<td>${vo.title }</td>
+					</tr>
+					<tr>
+						<th>내용</th>
+						<td>${vo.content }</td>
+					</tr>
+					<tr>
+						<th>작성자</th>
+						<td>${vo.writer }</td>
+					</tr>
+					<tr>
+						<th>작성일</th>
+						<td><fmt:formatDate pattern="yyyy-MM-dd"
+								value="${vo.writeDate }" /></td>
+					</tr>
+					<tr>
+						<th>조회수</th>
+						<td><fmt:formatNumber pattern="#,###" value="${vo.hit }" /></td>
+					</tr>
+				</tbody>
+			</table>
+			<a href="update.do?no=${vo.no }" class="btn btn-default">수정</a> <a
+				href="#" class="btn btn-default" onclick="return false"
+				id="deleteBtn">삭제</a> <a href="list.do" class="btn btn-default">리스트</a>
+			<div id="deleteDiv">
+				<form action="delete.do" method="post">
+					<input name="no" value="${vo.no }" type="hidden">
+					<div class="form-group">
+						<label>본인 확인용 비밀번호 입력 :</label> <input name="pw"
+							class="form-control" type="password">
+					</div>
+					<button class="btn btn-danger btn-sm">삭제</button>
+					<button class="btn btn-warning btn-sm" type="button" id="cancelBtn">취소</button>
+				</form>
+			</div>
 		</div>
 	</div>
 
@@ -255,6 +310,7 @@ ul.chat > li:hover{
 						</li>
 					</ul>
 				</div>
+				<div class="card-footer" id="replyPageDiv" ></div>
 			</div>
 		</div>
 	</div>

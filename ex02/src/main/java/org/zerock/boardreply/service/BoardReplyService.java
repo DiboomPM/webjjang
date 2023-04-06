@@ -14,5 +14,5 @@ public interface BoardReplyService {
 
 	public int update(BoardReplyVO vo);
 	
-	public Long delete(Long rno);
+	public long delete(Long rno);
 }
